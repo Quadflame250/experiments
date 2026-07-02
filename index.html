@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏀 Basketball Quiz</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#ff7b00,#ffb347);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    background:#fff;
+    width:100%;
+    max-width:650px;
+    border-radius:15px;
+    padding:30px;
+    box-shadow:0 15px 40px rgba(0,0,0,.3);
+}
+
+h1{
+    text-align:center;
+    color:#ff6a00;
+    margin-bottom:20px;
+}
+
+#progress{
+    text-align:right;
+    margin-bottom:15px;
+    color:#777;
+    font-weight:bold;
+}
+
+#question{
+    font-size:24px;
+    margin-bottom:20px;
+    color:#222;
+}
+
+.btn{
+    width:100%;
+    padding:15px;
+    margin:10px 0;
+    border:none;
+    border-radius:10px;
+    background:#f4f4f4;
+    cursor:pointer;
+    font-size:17px;
+    transition:.3s;
+}
+
+.btn:hover{
+    background:#ff8c00;
+    color:white;
+}
+
+.correct{
+    background:#28a745 !important;
+    color:white;
+}
+
+.wrong{
+    background:#dc3545 !important;
+    color:white;
+}
+
+#nextBtn{
+    display:none;
+    margin-top:20px;
+    background:#ff6a00;
+    color:white;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    width:100%;
+    font-size:18px;
+}
+
+#nextBtn:hover{
+    background:#e55d00;
+}
+
+#score{
+    text-align:center;
+    font-size:30px;
+    color:#ff6a00;
+}
+
+#restart{
+    display:none;
+    margin-top:20px;
+    width:100%;
+    padding:15px;
+    border:none;
+    background:#28a745;
+    color:white;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+#restart:hover{
+    background:#1d8a36;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🏀 Basketball Quiz</h1>
+
+<div id="progress"></div>
+
+<h2 id="question"></h2>
+
+<div id="answers"></div>
+
+<button id="nextBtn">Next Question ➜</button>
+
+<div id="score"></div>
+
+<button id="restart">Play Again</button>
+
+</div>
+
+<script>
+
+const questions = [
+
+{
+question:"How many players from one team are on the court at a time?",
+answers:[
+{text:"4",correct:false},
+{text:"5",correct:true},
+{text:"6",correct:false},
+{text:"7",correct:false}
+]
+},
+
+{
+question:"How many points is a free throw worth?",
+answers:[
+{text:"1",correct:true},
+{text:"2",correct:false},
+{text:"3",correct:false},
+{text:"4",correct:false}
+]
+},
+
+{
+question:"Who invented basketball?",
+answers:[
+{text:"Michael Jordan",correct:false},
+{text:"James Naismith",correct:true},
+{text:"LeBron James",correct:false},
+{text:"Magic Johnson",correct:false}
+]
+},
+
+{
+question:"How many quarters are played in an NBA game?",
+answers:[
+{text:"2",correct:false},
+{text:"3",correct:false},
+{text:"4",correct:true},
+{text:"5",correct:false}
+]
+},
+
+{
+question:"A shot made behind the three-point line is worth?",
+answers:[
+{text:"2",correct:false},
+{text:"3",correct:true},
+{text:"4",correct:false},
+{text:"5",correct:false}
+]
+},
+
+{
+question:"What violation occurs when a player takes too many steps without dribbling?",
+answers:[
+{text:"Traveling",correct:true},
+{text:"Charging",correct:false},
+{text:"Blocking",correct:false},
+{text:"Goaltending",correct:false}
+]
+},
+
+{
+question:"Which player was famous for wearing number 23 for the Chicago Bulls?",
+answers:[
+{text:"Kobe Bryant",correct:false},
+{text:"Stephen Curry",correct:false},
+{text:"Michael Jordan",correct:true},
+{text:"Shaquille O'Neal",correct:false}
+]
+},
+
+{
+question:"What is it called when a player scores by putting the ball directly through the hoop?",
+answers:[
+{text:"Slam Dunk",correct:true},
+{text:"Kick Ball",correct:false},
+{text:"Spike",correct:false},
+{text:"Serve",correct:false}
+]
+},
+
+{
+question:"How many points is a normal field goal worth?",
+answers:[
+{text:"1",correct:false},
+{text:"2",correct:true},
+{text:"3",correct:false},
+{text:"4",correct:false}
+]
+},
+
+{
+question:"Which league is considered the top professional basketball league in the world?",
+answers:[
+{text:"NFL",correct:false},
+{text:"MLB",correct:false},
+{text:"NBA",correct:true},
+{text:"NHL",correct:false}
+]
+}
+
+];
+
+const question=document.getElementById("question");
+const answers=document.getElementById("answers");
+const nextBtn=document.getElementById("nextBtn");
+const progress=document.getElementById("progress");
+const scoreText=document.getElementById("score");
+const restart=document.getElementById("restart");
+
+let current=0;
+let score=0;
+
+function startQuiz(){
+current=0;
+score=0;
+nextBtn.style.display="none";
+restart.style.display="none";
+scoreText.innerHTML="";
+showQuestion();
+}
+
+function showQuestion(){
+
+answers.innerHTML="";
+progress.innerHTML=`Question ${current+1} of ${questions.length}`;
+
+let q=questions[current];
+question.innerHTML=q.question;
+
+q.answers.forEach(answer=>{
+
+let button=document.createElement("button");
+button.innerHTML=answer.text;
+button.classList.add("btn");
+answers.appendChild(button);
+
+button.onclick=()=>selectAnswer(button,answer.correct);
+
+});
+
+}
+
+function selectAnswer(button,correct){
+
+Array.from(answers.children).forEach(btn=>btn.disabled=true);
+
+if(correct){
+button.classList.add("correct");
+score++;
+}else{
+button.classList.add("wrong");
+
+Array.from(answers.children).forEach((btn,index)=>{
+if(questions[current].answers[index].correct){
+btn.classList.add("correct");
+}
+});
+}
+
+nextBtn.style.display="block";
+
+}
+
+nextBtn.onclick=()=>{
+
+current++;
+
+if(current<questions.length){
+
+showQuestion();
+nextBtn.style.display="none";
+
+}else{
+
+showScore();
+
+}
+
+};
+
+function showScore(){
+
+question.innerHTML="🏆 Quiz Complete!";
+answers.innerHTML="";
+progress.innerHTML="";
+scoreText.innerHTML=`You scored <b>${score}</b> out of <b>${questions.length}</b>`;
+nextBtn.style.display="none";
+restart.style.display="block";
+
+}
+
+restart.onclick=startQuiz;
+
+startQuiz();
+
+</script>
+
+</body>
+</html>
